@@ -94,10 +94,8 @@ def get_network_name():
     return "Unknown Network"
 
 def resolve_device(ip, mac, hostname):
-    if not mac and not hostname:
-        return None
-
-    connection = sqlite3.connect("monitor.db")
+    connection = sqlite3.connect("monitor.db", timeout=10)
+    connection.execute("PRAGMA journal_mode=WAL;")
     cursor = connection.cursor()
     device_id = None
 
@@ -247,6 +245,23 @@ def get_device_info(result):
         "response_time_ms": result["response_time_ms"]
     }
 
+def ping_gateway(gateway):
+    start = time.perf_counter()
+
+    result = subprocess.run(
+        ["ping", "-n", "1", "-w", "500", gateway],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL
+    )
+
+    end = time.perf_counter()
+
+    if result.returncode == 0:
+        return round((end - start) * 1000, 2)
+
+    return 0
+
+
 def build_device_list(online_devices):
     online_ids = {dev["id"] for dev in online_devices if dev.get("id")}
     known_devices = get_known_devices()
@@ -353,7 +368,6 @@ def system_info():
             "name" : platform.processor(),
             "usage_percent": psutil.cpu_percent(interval=0.5),
             "cores": psutil.cpu_count(logical=True),
-            "threads": psutil.cpu_count(logical=True),
         },
         "memory": {
             "total_gb": round(memory.total / (1024 ** 3), 2),
@@ -390,15 +404,7 @@ async def websocket_endpoint(websocket: WebSocket):
             latency = 0
             gateway = get_gateway()
             if gateway:
-                start = time.perf_counter()
-                result = subprocess.run(
-                    ["ping", "-n", "1", "-w", "500", gateway],
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL
-                )
-                end = time.perf_counter()
-                if result.returncode == 0:
-                    latency = round((end - start) * 1000, 2)
+                latency = await asyncio.to_thread(ping_gateway, gateway)
 
 
 
@@ -415,7 +421,7 @@ async def websocket_endpoint(websocket: WebSocket):
             download_mb = round(download / 1_000_000, 2)
             upload_mb = round(upload / 1_000_000, 2)
 
-            save_stats(datetime.now().isoformat(), cpu, ram, download_mb, upload_mb)
+            await asyncio.to_thread(save_stats, datetime.now().isoformat(), cpu, ram, download_mb, upload_mb) 
 
             await websocket.send_json({
                 "cpu": {
@@ -446,7 +452,7 @@ def get_history():
         SELECT timestamp, cpu, ram, download, upload
         FROM stats
         ORDER BY id ASC
-        LIMIT 300
+        LIMIT 40
     """)
     rows = cursor.fetchall()
     connection.close()

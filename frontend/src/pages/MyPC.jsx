@@ -191,7 +191,7 @@ function MyPC({ws,setws,system,setsystem})
                         <p className="text-base font-light pt-5 pl-0" style={{ color: "var(--text)" }}>
                             CORES/THREADS
                             <span className="block mt-2 font-mono font-semibold text-3xl text-gray-200">
-                                {system?.cpu.cores}/{system?.cpu.threads}
+                                {system?.cpu.cores}
                             </span>
                         </p>
                     </div>

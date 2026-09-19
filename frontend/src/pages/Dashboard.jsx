@@ -8,6 +8,12 @@ import {
     CartesianGrid,
     Tooltip
 } from "recharts";
+import {
+    Router,
+    Wifi,
+    Download,
+    Upload
+} from "lucide-react";
 function Dashboard({devices,wifi,setwifi,netstat,setnetstat,ws,setws,system,setsystem})
 {
     const navigate = useNavigate();
@@ -67,14 +73,6 @@ function Dashboard({devices,wifi,setwifi,netstat,setnetstat,ws,setws,system,sets
                     {/* First row */}
                     <div className="network-row">
                         <span style={{fontSize:"35px",fontWeight:"1000"}}>{wifi}</span>
-
-                        {netstat === "Online" && (
-                            <img src="online.png" alt="Online" />
-                        )}
-
-                        {netstat === "Offline" && (
-                            <img src="offline.png" alt="Offline" />
-                        )}
                     </div>
 
                     {/* Second row */}
@@ -82,82 +80,180 @@ function Dashboard({devices,wifi,setwifi,netstat,setnetstat,ws,setws,system,sets
                         <span style={{fontSize:"20px",fontWeight:"1000"}}>Network Status : {netstat}</span>
                     </div>
 
+                    {netstat === "Online" && (
+                        <div className="wifi-img">
+                            <img src="online.png" />
+                        </div>
+                    )}
+
+                    {netstat === "Offline" && (
+                        <div className="wifi-img">
+                            <img src="offline.png" />
+                        </div>
+                    )}
+
+
+                    <div className="containerbutton">
+                        <button onClick={() => navigate("/scan")} className="searchbutton">
+                            <div className="button-press">
+                                Go to Scanner page
+                                <img src="search.png" alt ="search"></img>
+                            </div>
+                        </button>
+                    </div>
+
                 </div>
+
+
+
+
+
+
+
+
+                
             </div>
                     
 
-            <div className="containerbutton">
-                <button onClick={() => navigate("/scan")} className="searchbutton">
-                    <div className="button-scan">
-                                Go to Scanner page
-                                <img src="search.png" alt ="search"></img>
+
+            <div className="containertwo">
+
+                {/* Router Latency */}
+                <div className="info-box">
+
+                    <div className="metric-heading">
+                        <Router size={18} />
+                        <span>Router Latency</span>
                     </div>
-                </button>
+
+                    <div className="latency-value">
+                        {ws?.latency.ms ?? "--"}
+                        <span>ms</span>
+                    </div>
+
+                    <div className="latency-bar">
+                        <div className="latency-progress"></div>
+                    </div>
+
+                    <span className="metric-description">
+                        Network response
+                    </span>
+
+                </div>
+
+
+                {/* Devices */}
+                <div className="info-box">
+
+                    <div className="metric-heading">
+                        <Wifi size={18} />
+                        <span>Devices Online</span>
+                    </div>
+
+                    <div className="device-value">
+                        {devices}
+                    </div>
+
+                    <span className="metric-description">
+                        {devices === 0
+                            ? "No devices found"
+                            : devices === 1
+                                ? "Device connected"
+                                : "Devices connected"
+                        }
+                    </span>
+
+                </div>
+
+
+                {/* Download */}
+                <div className="info-box">
+
+                    <div className="metric-heading download-heading">
+                        <Download size={18} />
+                        <span>Download</span>
+                    </div>
+
+                    <div className="speed-arrow download-arrow">
+                        <Download size={25} />
+                    </div>
+
+                    <div className="speed-value">
+                        {download}
+                    </div>
+
+                    <span className="speed-unit">
+                        MB/s
+                    </span>
+
+                </div>
+
+
+                {/* Upload */}
+                <div className="info-box">
+
+                    <div className="metric-heading upload-heading">
+                        <Upload size={18} />
+                        <span>Upload</span>
+                    </div>
+
+                    <div className="speed-arrow upload-arrow">
+                        <Upload size={25} />
+                    </div>
+
+                    <div className="speed-value">
+                        {upload}
+                    </div>
+
+                    <span className="speed-unit">
+                        MB/s
+                    </span>
+
+                </div>
+
             </div>
 
-            <div className="containertwo">
-                <div className="info-box">
-                    Router Latency : {ws?.latency.ms}
-                </div>
-                <div className="info-box">       
-                    {devices === 0 && (
-                        <div>
-                            No Devices Found
-                        </div>
-                    )}
-                    {devices != 0 && (
-                        <div>
-                            Devices Online : {devices}
-                        </div>
-                    )}
-                </div>
-            </div>
-
-            <div className="containertwo">
-                <div className="info-box">
-                    <span>Download Speed : {download}</span>
-                </div>
-                <div className="info-box">
-                    <span>Upload Speed : {upload}</span>
-                </div>
-            </div>
 
             <div className="graph-container">
-                <LineChart
-                    width={400}
-                    height={200}
-                    data={bandwidthHistory}
-                >
-                    <CartesianGrid strokeDasharray="3 3" />
+                <span className="device-header">Live Graph of Download/Upload MB/s</span>
 
-                    <XAxis dataKey="time" />
+                <div className="graph">
+                    <LineChart 
+                        width={800} 
+                        height={220} 
+                        data={bandwidthHistory} 
+                    >
+                        <CartesianGrid strokeDasharray="3 3" />
 
-                    <YAxis
-                        domain={[0, 10]}
-                        tickCount={6}
-                        label={{
-                            value: "MB/s",
-                            angle: -90,
-                            position: "insideLeft"
-                        }}
-                    />
+                        <XAxis dataKey="time" />
 
-                    <Tooltip />
+                        <YAxis 
+                            domain={[0, 10]}
+                            tickCount={6}
+                            label={{
+                                value: "MB/s",
+                                angle: -90,
+                                position: "insideLeft"
+                            }}
+                        />
 
-                    <Line
-                        type="natural"
-                        dataKey="download"
-                        stroke="green"
-                        dot={false}
-                    />
+                        <Tooltip />
 
-                    <Line
-                        type="monotone"
-                        dataKey="upload"
-                        stroke="red"
-                        dot={false}
-                    />
-                </LineChart>
+                        <Line
+                            type="natural"
+                            dataKey="download"
+                            stroke="green"
+                            dot={false}
+                        />
+
+                        <Line
+                            type="monotone"
+                            dataKey="upload"
+                            stroke="red"
+                            dot={false}
+                        />
+                    </LineChart>
+                </div>
             </div>
 
         </div>

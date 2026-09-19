@@ -1,9 +1,8 @@
 import { useState } from "react"
 import { LoaderCircle,Radar } from "lucide-react";
 import { RefreshCw } from "lucide-react";
-function NetworkScanner({ devices, setdevices, scanned, setscanned ,dev,setdev}) {
+function NetworkScanner({ devices, setdevices, scanned, setscanned ,dev,setdev,load,setload}) {
 
-    const [load,setload] = useState(false)
     const [bar,setbar] = useState(false)
     const [rename_id,set_rename_id] = useState(0)
     const [string,set_string] = useState("")

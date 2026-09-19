@@ -18,6 +18,7 @@ function App() {
   const [wifi,setwifi] = useState("Unknown")
   const [netstat,setnetstat] = useState("Offline")
   const [scanned,setscanned] = useState(false)
+  const [load,setload] = useState(false)
   const [dev, setdev] = useState([])
   const [ws,setws] = useState(null)
   const [system,setsystem] = useState(null)
@@ -87,6 +88,8 @@ function App() {
                                         setscanned={setscanned}
                                         dev={dev}
                                         setdev={setdev}
+                                        load={load}
+                                        setload={setload}
                                         />
                                         } />
         <Route path="/pc" element={<MyPC 

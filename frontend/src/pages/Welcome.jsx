@@ -54,7 +54,7 @@ function Welcome() {
 
             </div>
             <div className="build-tag">
-                <span>Build v1.00</span>
+                <span>Build v1.2</span>
             </div>
         </div>
     );
